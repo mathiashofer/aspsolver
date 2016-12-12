@@ -1,5 +1,6 @@
 package at.mhofer.aspsolver.data;
 
+@Deprecated
 public enum TruthValue {
 
 	TRUE, FALSE, UNASSIGNED;
