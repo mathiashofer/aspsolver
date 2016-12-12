@@ -1,17 +1,26 @@
 package at.mhofer.aspsolver.solver;
 
 import java.util.List;
-import java.util.Map;
 
-import at.mhofer.aspsolver.data.Atom;
-import at.mhofer.aspsolver.data.Literal;
+import at.mhofer.aspsolver.data.Assignment;
 import at.mhofer.aspsolver.data.Nogood;
 
 public class SATSolver {
 
-	private List<Atom> unitPropagation(List<Nogood> instance, List<Atom> assignment, Map<Nogood, List<Literal>> wn,
-			Map<Literal, List<Nogood>> wl) {
-		return null;
+	private Propagation propagation;
+
+	public SATSolver(Propagation propagation) {
+		this.propagation = propagation;
+	}
+
+	/**
+	 * @param rules
+	 * @return true if the set of rules is satisfiable, false otherwise
+	 */
+	public boolean solve(List<Nogood> instance, Assignment initialAssignment) {
+		Assignment assignment = propagation.propagate(instance, initialAssignment, null);
+
+		return true;
 	}
 
 }

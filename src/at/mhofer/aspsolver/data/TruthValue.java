@@ -2,7 +2,7 @@ package at.mhofer.aspsolver.data;
 
 public enum TruthValue {
 
-	TRUE, FALSE, UNKNOWN;
+	TRUE, FALSE, UNASSIGNED;
 
 	public TruthValue negate() {
 		TruthValue value = values()[ordinal()];
@@ -11,7 +11,7 @@ public enum TruthValue {
 		} else if (value == TruthValue.FALSE) {
 			return TruthValue.TRUE;
 		} else {
-			return TruthValue.UNKNOWN;
+			return TruthValue.UNASSIGNED;
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package at.mhofer.aspsolver.data;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Nogood {
@@ -14,8 +15,42 @@ public class Nogood {
 		}
 	}
 
-	public TruthValue getTruthValue() {
-		return TruthValue.UNKNOWN;
+	public boolean isSatisfiedBy(Assignment assignment) {
+		return assignment.containsAll(literals);
+	}
+
+	public boolean isFalsifiedBy(Assignment assignment) {
+		for (Literal l : literals) {
+			if (assignment.contains(l.createNegation())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public List<Literal> getUnassignedLiterals(Assignment assignment) {
+		List<Literal> unassigned = new LinkedList<Literal>();
+		for (Literal l : literals) {
+			if (!assignment.isAssigned(l.getAtom())) {
+				unassigned.add(l);
+			}
+		}
+		return unassigned;
+	}
+	
+	/**
+	 * 
+	 * @param assignment
+	 * @param except the literal which should not be returned
+	 * @return
+	 */
+	public Literal getFirstUnassignedLiteral(Assignment assignment, Literal except) {
+		for (Literal l : literals) {
+			if (!assignment.isAssigned(l.getAtom()) && !l.equals(except)) {
+				return l;
+			}
+		}
+		return null;
 	}
 
 	public List<Literal> getLiterals() {

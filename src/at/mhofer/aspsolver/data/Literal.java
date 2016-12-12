@@ -11,11 +11,16 @@ public class Literal {
 		this.positive = positive;
 		this.atom = atom;
 	}
-
-	public TruthValue getTruthValue() {
-		return positive ? atom.getTruthValue() : atom.getTruthValue().negate();
+	
+	/**
+	 * Creates a negation of this literal
+	 * 
+	 * @return
+	 */
+	public Literal createNegation() {
+		return new Literal(atom, !positive);
 	}
-
+	
 	public Atom getAtom() {
 		return atom;
 	}
@@ -28,4 +33,33 @@ public class Literal {
 		return !positive;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((atom == null) ? 0 : atom.hashCode());
+		result = prime * result + (positive ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Literal other = (Literal) obj;
+		if (atom == null) {
+			if (other.atom != null)
+				return false;
+		} else if (!atom.equals(other.atom))
+			return false;
+		if (positive != other.positive)
+			return false;
+		return true;
+	}
+
+	
 }
