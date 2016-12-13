@@ -17,7 +17,7 @@ public class Literal {
 	 * 
 	 * @return
 	 */
-	public Literal createNegation() {
+	public Literal negation() {
 		return new Literal(atom, !positive);
 	}
 	

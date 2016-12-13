@@ -2,13 +2,14 @@ package at.mhofer.aspsolver.data;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import at.mhofer.aspsolver.data.err.IllegalAssignmentException;
 
-public class Assignment {
+public class Assignment implements Iterable<Literal>{
 
 	private List<Literal> assignedLiterals;
 
@@ -84,6 +85,10 @@ public class Assignment {
 		return assignedLiterals;
 	}
 	
+	public boolean isComplete(Collection<Atom> atoms) {
+		return assignedAtoms.containsAll(atoms);
+	}
+	
 	public void print() {
 		StringBuilder builder = new StringBuilder("{");
 		boolean first = true;
@@ -98,5 +103,10 @@ public class Assignment {
 		}
 		builder.append("}");
 		System.out.println(builder.toString());
+	}
+
+	@Override
+	public Iterator<Literal> iterator() {
+		return assignedLiterals.iterator();
 	}
 }
