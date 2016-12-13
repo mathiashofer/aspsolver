@@ -1,10 +1,11 @@
 package at.mhofer.aspsolver.data;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Nogood {
+public class Nogood implements Iterable<Literal>{
 
 	private List<Literal> literals;
 
@@ -55,5 +56,10 @@ public class Nogood {
 
 	public List<Literal> getLiterals() {
 		return literals;
+	}
+
+	@Override
+	public Iterator<Literal> iterator() {
+		return literals.iterator();
 	}
 }

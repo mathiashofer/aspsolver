@@ -21,18 +21,35 @@ public class Assignment {
 		super();
 		this.assignedLiterals = new LinkedList<Literal>();
 	}
+	
+	public Assignment(Assignment toCopy) {
+		super();
+		this.assignedLiterals = new LinkedList<Literal>(toCopy.assignedLiterals);
+		this.assignedAtoms = new HashSet<Atom>(toCopy.assignedAtoms);
+	}
 
 	public Assignment(List<Literal> assignedLiterals) {
 		super();
 		this.assignedLiterals = assignedLiterals;
 	}
 
-	public boolean contains(Object o) {
-		return assignedAtoms.contains(o);
+	public boolean contains(Literal l) {
+		return assignedAtoms.contains(l);
 	}
 
-	public boolean containsAll(Collection<?> c) {
-		return assignedAtoms.containsAll(c);
+	public boolean containsAll(Collection<Literal> ls) {
+		return assignedAtoms.containsAll(ls);
+	}
+	
+	/**
+	 * 
+	 * @param assignment
+	 * @return all literals which are only in this assignment but not in the given one
+	 */
+	public List<Literal> difference(Assignment assignment) {
+		List<Literal> difference = new LinkedList<Literal>(assignedLiterals);
+		difference.removeAll(assignment.getAssignedLiterals());
+		return difference;
 	}
 
 	/**
@@ -65,5 +82,21 @@ public class Assignment {
 
 	public List<Literal> getAssignedLiterals() {
 		return assignedLiterals;
+	}
+	
+	public void print() {
+		StringBuilder builder = new StringBuilder("{");
+		boolean first = true;
+		for (Literal l : assignedLiterals) {
+			if (first) {
+				first = false;
+			} else{
+				builder.append(", ");
+			}
+			String prefix = l.isPositive() ? "T" : "F";
+			builder.append(prefix + l.getAtom().getLabel());
+		}
+		builder.append("}");
+		System.out.println(builder.toString());
 	}
 }
