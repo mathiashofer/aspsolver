@@ -14,6 +14,7 @@ import java.util.Map;
 import at.mhofer.aspsolver.data.Assignment;
 import at.mhofer.aspsolver.data.Atom;
 import at.mhofer.aspsolver.data.Literal;
+import at.mhofer.aspsolver.data.Program;
 import at.mhofer.aspsolver.data.Rule;
 import at.mhofer.aspsolver.data.Tuple;
 
@@ -23,14 +24,14 @@ public class LParseParser implements Parser {
 	// private static final int RULE_TYPE_CHOICE = 3;
 	// private static final int RULE_TYPE_DISJUNCTIVE = 8;
 
-	public Tuple<List<Rule>, Assignment> parse(File file) throws IOException {
+	public Program parse(File file) throws IOException {
 		List<Rule> rules = new LinkedList<Rule>();
 		// contains the always true resp. always false literals
 		Assignment assignment = new Assignment();
+		Map<Integer, Atom> atoms = new HashMap<Integer, Atom>();
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
 			ParsingPart currentPart = nextPart(ParsingPart.BEGIN);
 			// maps atomids to atoms
-			Map<Integer, Atom> atoms = new HashMap<Integer, Atom>();
 			// interal atom
 			atoms.put(1, new Atom(1, "_false"));
 			String line = null;
@@ -103,7 +104,7 @@ public class LParseParser implements Parser {
 			reader.close();
 		}
 
-		return new Tuple<List<Rule>, Assignment>(rules, assignment);
+		return new Program(rules, assignment, new ArrayList<Atom>(atoms.values()));
 	}
 
 	private ParsingPart nextPart(ParsingPart currentPart) {

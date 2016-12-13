@@ -72,7 +72,7 @@ public class UnitPropagation implements Propagation{
 				wn.put(nogood, new Tuple<Literal, Literal>(watchedLiteral, unassignedLiteral));
 			}
 			else {
-				Literal negation = watchedLiteral.createNegation();
+				Literal negation = watchedLiteral.negation();
 				extended.assign(negation);
 				implicants.put(extended, negation, nogood);
 				//calculate max decision level

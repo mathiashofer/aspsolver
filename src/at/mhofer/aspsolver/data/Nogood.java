@@ -22,7 +22,7 @@ public class Nogood implements Iterable<Literal>{
 
 	public boolean isFalsifiedBy(Assignment assignment) {
 		for (Literal l : literals) {
-			if (assignment.contains(l.createNegation())) {
+			if (assignment.contains(l.negation())) {
 				return true;
 			}
 		}
