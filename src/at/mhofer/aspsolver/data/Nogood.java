@@ -8,6 +8,10 @@ import java.util.List;
 public class Nogood implements Iterable<Literal>{
 
 	private List<Literal> literals;
+	
+	public Nogood(Nogood nogood) {
+		this(nogood.literals);
+	}
 
 	public Nogood(List<Literal> clause) {
 		literals = new ArrayList<Literal>(clause.size());

@@ -1,20 +1,21 @@
 package at.mhofer.aspsolver.solver;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import at.mhofer.aspsolver.data.Assignment;
 import at.mhofer.aspsolver.data.Atom;
-import at.mhofer.aspsolver.data.Falsum;
 import at.mhofer.aspsolver.data.Literal;
 import at.mhofer.aspsolver.data.Nogood;
+import at.mhofer.aspsolver.data.Tuple;
 import at.mhofer.aspsolver.data.TupleKeyHashMap;
 
-public class SATSolver {
+public class CDNLSATSolver {
 
 	private Propagation propagation;
+
+	private ConflictAnalysis conflictAnalysis;
 
 	private TupleKeyHashMap<Assignment, Literal, Nogood> implicants;
 
@@ -25,12 +26,11 @@ public class SATSolver {
 	// TODO change datastructure
 	private Map<Integer, Literal> guesses = new HashMap<Integer, Literal>();
 
-	// private int currentDL = 0;
-
-	public SATSolver(Propagation propagation, List<Atom> atoms,
+	public CDNLSATSolver(Propagation propagation, ConflictAnalysis conflictAnalysis, List<Atom> atoms,
 			TupleKeyHashMap<Assignment, Literal, Integer> decisionLevels,
 			TupleKeyHashMap<Assignment, Literal, Nogood> implicants) {
 		this.propagation = propagation;
+		this.conflictAnalysis = conflictAnalysis;
 		this.atoms = atoms;
 		this.decisionLevels = decisionLevels;
 		this.implicants = implicants;
@@ -53,19 +53,18 @@ public class SATSolver {
 				return false;
 			} else if (n.isSatisfiedBy(assignment) && currentDL > 0) {
 				// backtracking
-				int k = Collections.max(guesses.keySet());
+				Tuple<Nogood, Integer> analysisResult = conflictAnalysis.analyse(n, instance, assignment);
+				Nogood learnedNogood = analysisResult.getValue1();
+				int backtrackDL = analysisResult.getValue2();
+				instance.add(learnedNogood);
 
-				for (Literal l : assignment) {
-					if (decisionLevels.get(assignment, l) > k && l.isPositive()) {
+				for (Literal l : decisionLevels.getKeys(assignment)) {
+					if (decisionLevels.get(assignment, l) > backtrackDL && l.isPositive()) {
 						assignment.unassign(l);
 					}
 				}
-				Literal l = guesses.get(k + 1);
-				Literal alternativeGuess = l.negation();
-				assignment.assign(alternativeGuess);
-				decisionLevels.put(assignment, alternativeGuess, k);
-				implicants.put(assignment, alternativeGuess, new Falsum());
-				return solve(instance, assignment, recentlyAssigned, currentDL);
+
+				return solve(instance, assignment, recentlyAssigned, backtrackDL);
 			}
 		}
 
@@ -77,12 +76,17 @@ public class SATSolver {
 			currentDL++;
 			guesses.put(currentDL, guessed);
 			decisionLevels.put(assignment, guessed, currentDL);
-			implicants.put(assignment, guessed, new Falsum());
+			implicants.put(assignment, guessed, null);
 			assignment.assign(guessed);
 			return solve(instance, assignment, guessed, currentDL);
 		}
 	}
 
+	/**
+	 * 
+	 * @param assignment
+	 * @return
+	 */
 	private Literal select(Assignment assignment) {
 		for (Atom a : atoms) {
 			if (!assignment.isAssigned(a)) {

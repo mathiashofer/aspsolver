@@ -1,6 +1,7 @@
 package at.mhofer.aspsolver.data;
 
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Simply a HashMap with two keys instead of one
@@ -42,6 +43,14 @@ public class TupleKeyHashMap<K1, K2, V> {
 		previous = k2Map.put(key2, value);
 
 		return previous;
+	}
+	
+	public Set<K1> getKeys() {
+		return this._map.keySet();
+	}
+	
+	public Set<K2> getKeys(K1 key) {
+		return this._map.get(key).keySet();
 	}
 
 	/**

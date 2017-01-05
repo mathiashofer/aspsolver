@@ -16,7 +16,6 @@ import at.mhofer.aspsolver.data.Atom;
 import at.mhofer.aspsolver.data.Literal;
 import at.mhofer.aspsolver.data.Program;
 import at.mhofer.aspsolver.data.Rule;
-import at.mhofer.aspsolver.data.Tuple;
 
 public class LParseParser implements Parser {
 
@@ -28,10 +27,10 @@ public class LParseParser implements Parser {
 		List<Rule> rules = new LinkedList<Rule>();
 		// contains the always true resp. always false literals
 		Assignment assignment = new Assignment();
+		// maps atomids to atoms
 		Map<Integer, Atom> atoms = new HashMap<Integer, Atom>();
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
 			ParsingPart currentPart = nextPart(ParsingPart.BEGIN);
-			// maps atomids to atoms
 			// interal atom
 			atoms.put(1, new Atom(1, "_false"));
 			String line = null;
