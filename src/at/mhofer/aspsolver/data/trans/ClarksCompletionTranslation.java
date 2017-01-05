@@ -17,7 +17,7 @@ public class ClarksCompletionTranslation implements Translation {
 	/**
 	 * Use negative numbers for the ids of the auxiliary atoms
 	 */
-	private int currentAuxId = -1;
+	private int currentAuxId;
 
 	@Override
 	public List<Nogood> translate(Program program) {
@@ -34,6 +34,7 @@ public class ClarksCompletionTranslation implements Translation {
 			nogoods.addAll(gamma(rule.getBody()));
 
 			Atom auxAtom = new Atom(currentAuxId, "aux_" + -currentAuxId);
+			currentAuxId--;
 			auxMap.put(rule, auxAtom);
 
 			List<Literal> literals = new LinkedList<Literal>(rule.getHead());
