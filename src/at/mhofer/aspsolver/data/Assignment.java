@@ -13,9 +13,6 @@ public class Assignment implements Iterable<Literal>{
 
 	private List<Literal> assignedLiterals;
 
-	/**
-	 * Offers constant time for contains()
-	 */
 	private Set<Atom> assignedAtoms = new HashSet<Atom>();
 
 	public Assignment() {

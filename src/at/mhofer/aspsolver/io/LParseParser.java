@@ -75,7 +75,7 @@ public class LParseParser implements Parser {
 							literals.add(new Literal(atom, true));
 						}
 
-						rules.add(new Rule(head, literals));
+						rules.add(new Rule(new Literal(head, true), literals));
 					} else {
 						throw new IOException("Illegal file format, only normal programs are supported!");
 					}

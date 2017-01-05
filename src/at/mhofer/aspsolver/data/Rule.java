@@ -1,24 +1,32 @@
 package at.mhofer.aspsolver.data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Rule {
 
-	private Atom head;
+	private List<Literal> head;
 	
 	private List<Literal> body;
+	
+	public Rule(Literal head, List<Literal> body) {
+		super();
+		this.head = new ArrayList<Literal>(0);
+		this.head.add(head);
+		this.body = body;
+	}
 
-	public Rule(Atom head, List<Literal> body) {
+	public Rule(List<Literal> head, List<Literal> body) {
 		super();
 		this.head = head;
 		this.body = body;
 	}
 
-	public Atom getHead() {
+	public List<Literal> getHead() {
 		return head;
 	}
 
-	public void setHead(Atom head) {
+	public void setHead(List<Literal> head) {
 		this.head = head;
 	}
 
