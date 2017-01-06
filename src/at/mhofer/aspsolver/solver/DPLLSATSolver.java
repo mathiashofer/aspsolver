@@ -11,7 +11,7 @@ import at.mhofer.aspsolver.data.Literal;
 import at.mhofer.aspsolver.data.Nogood;
 import at.mhofer.aspsolver.data.TupleKeyHashMap;
 
-public class DPLLSATSolver {
+public class DPLLSATSolver implements SATSolver{
 
 	private Propagation propagation;
 

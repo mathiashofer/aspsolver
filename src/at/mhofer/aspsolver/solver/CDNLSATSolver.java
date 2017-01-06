@@ -11,7 +11,7 @@ import at.mhofer.aspsolver.data.Nogood;
 import at.mhofer.aspsolver.data.Tuple;
 import at.mhofer.aspsolver.data.TupleKeyHashMap;
 
-public class CDNLSATSolver {
+public class CDNLSATSolver implements SATSolver{
 
 	private Propagation propagation;
 
