@@ -5,18 +5,36 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Nogood implements Iterable<Literal>{
+public class Nogood implements Iterable<Literal> {
 
 	private List<Literal> literals;
-	
+
 	public Nogood(Nogood nogood) {
-		this(nogood.literals);
+		this(nogood.literals, false);
 	}
 
+	/**
+	 * Expects a clause which should be converted to a nogood
+	 * 
+	 * @param clause
+	 */
 	public Nogood(List<Literal> clause) {
 		literals = new ArrayList<Literal>(clause.size());
 		for (Literal l : clause) {
 			literals.add(new Literal(l.getAtom(), !l.isPositive()));
+		}
+	}
+
+	/**
+	 * 
+	 * @param literals
+	 * @param clause
+	 *            converts the clause into a nogood if true, otherwise it doesnt
+	 */
+	public Nogood(List<Literal> literals, boolean clause) {
+		this.literals = new ArrayList<Literal>(literals.size());
+		for (Literal l : literals) {
+			this.literals.add(new Literal(l.getAtom(), clause ? !l.isPositive() : l.isPositive()));
 		}
 	}
 
@@ -42,11 +60,12 @@ public class Nogood implements Iterable<Literal>{
 		}
 		return unassigned;
 	}
-	
+
 	/**
 	 * 
 	 * @param assignment
-	 * @param except the literal which should not be returned
+	 * @param except
+	 *            the literal which should not be returned
 	 * @return
 	 */
 	public Literal getFirstUnassignedLiteral(Assignment assignment, Literal except) {
@@ -66,4 +85,10 @@ public class Nogood implements Iterable<Literal>{
 	public Iterator<Literal> iterator() {
 		return literals.iterator();
 	}
+
+	@Override
+	public String toString() {
+		return literals.toString();
+	}
+
 }

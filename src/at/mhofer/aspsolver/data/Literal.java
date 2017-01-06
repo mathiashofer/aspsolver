@@ -21,6 +21,11 @@ public class Literal {
 		return new Literal(atom, !positive);
 	}
 	
+	@Override
+	public String toString() {
+		return (positive ? "T" : "F") + atom.getLabel();
+	}
+
 	public Atom getAtom() {
 		return atom;
 	}
@@ -60,6 +65,4 @@ public class Literal {
 			return false;
 		return true;
 	}
-
-	
 }

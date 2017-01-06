@@ -58,11 +58,13 @@ public class Program {
 	 */
 	public List<Rule> getRulesWithHead(Atom head) {
 		List<Rule> rulesForHead = new LinkedList<Rule>();
-		
-		//TODO performance improvements
+
+		// TODO performance improvements
 		for (Rule rule : rules) {
-			if (rule.getHead().contains(head)) {
-				rulesForHead.add(rule);
+			for (Literal literal : rule.getHead()) {
+				if (literal.getAtom().equals(head)) {
+					rulesForHead.add(rule);
+				}
 			}
 		}
 

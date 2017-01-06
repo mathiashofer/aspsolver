@@ -31,15 +31,21 @@ public class ClarksCompletionTranslation implements Translation {
 
 		// translate rules
 		for (Rule rule : program.getRules()) {
-			nogoods.addAll(gamma(rule.getBody()));
+			nogoods.addAll(gamma(rule.getBody(), rule, auxMap));
 
-			Atom auxAtom = new Atom(currentAuxId, "aux_" + -currentAuxId);
-			currentAuxId--;
-			auxMap.put(rule, auxAtom);
+			Atom auxAtom = auxMap.get(rule);
+			if (auxAtom == null) {
+				auxAtom = new Atom(currentAuxId, "aux_" + -currentAuxId);
+				auxMap.put(rule, auxAtom);
+				currentAuxId--;
+			}
 
-			List<Literal> literals = new LinkedList<Literal>(rule.getHead());
-			literals.add(new Literal(auxAtom, false));
-			nogoods.add(new Nogood(literals));
+			List<Literal> literals = new LinkedList<Literal>();
+			literals.add(new Literal(auxAtom, true));
+			for (Literal head : rule.getHead()) {
+				literals.add(new Literal(head.getAtom(), false));
+			}
+			nogoods.add(new Nogood(literals, false));
 		}
 
 		// translate atoms
@@ -49,7 +55,7 @@ public class ClarksCompletionTranslation implements Translation {
 			for (Rule rule : program.getRulesWithHead(atom)) {
 				literals.add(new Literal(auxMap.get(rule), false));
 			}
-			nogoods.add(new Nogood(literals));
+			nogoods.add(new Nogood(literals, false));
 		}
 
 		return nogoods;
@@ -61,23 +67,27 @@ public class ClarksCompletionTranslation implements Translation {
 	 * @param conjunction
 	 * @return
 	 */
-	private List<Nogood> gamma(List<Literal> conjunction) {
+	private List<Nogood> gamma(List<Literal> conjunction, Rule rule, Map<Rule, Atom> auxMap) {
 		List<Nogood> nogoods = new ArrayList<Nogood>(2);
 
-		Atom auxAtom = new Atom(currentAuxId, "aux_" + -currentAuxId);
-		currentAuxId--;
+		Atom auxAtom = auxMap.get(rule);
+		if (auxAtom == null) {
+			auxAtom = new Atom(currentAuxId, "aux_" + -currentAuxId);
+			auxMap.put(rule, auxAtom);
+			currentAuxId--;
+		}
 
 		List<Literal> literals = new LinkedList<Literal>(conjunction);
 		literals.add(new Literal(auxAtom, false));
-		nogoods.add(new Nogood(literals));
+		nogoods.add(new Nogood(literals, false));
 
-		literals = new LinkedList<Literal>();
 		Literal auxLiteral = new Literal(auxAtom, true);
 		for (Literal l : conjunction) {
+			literals = new LinkedList<Literal>();
 			literals.add(auxLiteral);
 			literals.add(l.negation());
+			nogoods.add(new Nogood(literals, false));
 		}
-		nogoods.add(new Nogood(literals));
 
 		return nogoods;
 	}
