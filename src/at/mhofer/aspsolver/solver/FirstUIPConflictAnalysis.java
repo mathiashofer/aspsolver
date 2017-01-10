@@ -10,19 +10,9 @@ import at.mhofer.aspsolver.data.TupleKeyHashMap;
 
 public class FirstUIPConflictAnalysis implements ConflictAnalysis {
 
-	private TupleKeyHashMap<Assignment, Literal, Integer> decisionLevels;
-
-	private TupleKeyHashMap<Assignment, Literal, Nogood> implicants;
-
-	public FirstUIPConflictAnalysis(TupleKeyHashMap<Assignment, Literal, Integer> decisionLevels,
-			TupleKeyHashMap<Assignment, Literal, Nogood> implicants) {
-		super();
-		this.decisionLevels = decisionLevels;
-		this.implicants = implicants;
-	}
-
 	@Override
-	public Tuple<Nogood, Integer> analyse(Nogood conflictingNogood, List<Nogood> instance, Assignment assignment) {
+	public Tuple<Nogood, Integer> analyse(Nogood conflictingNogood, List<Nogood> instance, Assignment assignment, TupleKeyHashMap<Assignment, Literal, Integer> decisionLevels,
+			TupleKeyHashMap<Assignment, Literal, Nogood> implicants) {
 		int newDL = -1;
 
 		int maxDL = 0;

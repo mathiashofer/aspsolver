@@ -7,6 +7,7 @@ import at.mhofer.aspsolver.data.Nogood;
 
 public interface SATSolver {
 
-	public boolean solve(List<Nogood> instance, Assignment initialAssignment);
+	public Assignment solve(List<Nogood> instance, Assignment initialAssignment);
 	
+	public List<Assignment> solveAll(List<Nogood> instance, Assignment initialAssignment);
 }

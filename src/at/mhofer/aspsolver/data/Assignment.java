@@ -58,7 +58,7 @@ public class Assignment implements Iterable<Literal>{
 	public void assign(Literal literal) {
 		if (assignedAtoms.contains(literal.getAtom())) {
 			throw new IllegalAssignmentException(
-					"Atom with id " + literal.getAtom().getId() + " already assignedLiterals!");
+					"Atom with id " + literal.getAtom().getId() + " already assigned!");
 		}
 		this.assignedLiterals.add(literal);
 		assignedAtoms.add(literal.getAtom());
@@ -106,4 +106,42 @@ public class Assignment implements Iterable<Literal>{
 	public Iterator<Literal> iterator() {
 		return assignedLiterals.iterator();
 	}
+	
+	@Override
+	public String toString() {
+		return assignedLiterals.toString();
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((assignedAtoms == null) ? 0 : assignedAtoms.hashCode());
+		result = prime * result + ((assignedLiterals == null) ? 0 : assignedLiterals.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Assignment other = (Assignment) obj;
+		if (assignedAtoms == null) {
+			if (other.assignedAtoms != null)
+				return false;
+		} else if (!assignedAtoms.equals(other.assignedAtoms))
+			return false;
+		if (assignedLiterals == null) {
+			if (other.assignedLiterals != null)
+				return false;
+		} else if (!assignedLiterals.equals(other.assignedLiterals))
+			return false;
+		return true;
+	}
+	
+	
 }
