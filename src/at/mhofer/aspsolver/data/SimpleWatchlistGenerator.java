@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class SimpleWatchlistGenerator implements WatchlistGenerator{
+public class SimpleWatchlistGenerator implements WatchlistGenerator {
 
 	@Override
 	public Tuple<Map<Nogood, Tuple<Literal, Literal>>, Map<Literal, List<Nogood>>> generateWatchlists(
@@ -15,7 +15,7 @@ public class SimpleWatchlistGenerator implements WatchlistGenerator{
 		for (Nogood nogood : instance) {
 			List<Literal> literals = nogood.getLiterals();
 			Literal l1 = literals.get(0);
-			Literal l2 = literals.size() > 1 ? literals.get(1) : null;
+			Literal l2 = literals.size() > 1 ? literals.get(1) : l1;
 			nogoodWatchlist.put(nogood, new Tuple<Literal, Literal>(l1, l2));
 
 			List<Nogood> n1 = literalWatchlist.getOrDefault(l1, new LinkedList<Nogood>());
@@ -26,7 +26,8 @@ public class SimpleWatchlistGenerator implements WatchlistGenerator{
 			n2.add(nogood);
 			literalWatchlist.put(l2, n2);
 		}
-		return new Tuple<Map<Nogood,Tuple<Literal,Literal>>, Map<Literal,List<Nogood>>>(nogoodWatchlist, literalWatchlist);
+		return new Tuple<Map<Nogood, Tuple<Literal, Literal>>, Map<Literal, List<Nogood>>>(nogoodWatchlist,
+				literalWatchlist);
 	}
 
 }

@@ -29,34 +29,33 @@ public class UnitPropagation implements Propagation {
 			HashMap<Literal, Integer> decisionLevels, HashMap<Literal, Nogood> implicants) {
 		List<Literal> changedLiterals = new LinkedList<Literal>();
 		changedLiterals.add(recentlyAssigned);
-		Assignment last = assignment;
 		Assignment extended = null;
 		do {
 			Literal changedLiteral = changedLiterals.remove(0);
 			extended = unitPropagationStep(instance, assignment, nogoodWatchlist, literalWatchlist, changedLiteral,
 					decisionLevels, implicants);
-			changedLiterals.addAll(extended.difference(last));
-			last = extended;
+			changedLiterals.addAll(extended.difference(assignment));
+			assignment = extended;
 		} while (!changedLiterals.isEmpty());
-		return last;
+		return assignment;
 	}
 
 	private Assignment unitPropagationStep(List<Nogood> instance, Assignment assignment,
 			Map<Nogood, Tuple<Literal, Literal>> wn, Map<Literal, List<Nogood>> wl, Literal recentlyAssigned,
 			HashMap<Literal, Integer> decisionLevels, HashMap<Literal, Nogood> implicants) {
-		Assignment extended = assignment;
+		Assignment extended = new Assignment(assignment);
 		if (wl.get(recentlyAssigned) != null) {
 			// used to avoid a ConcurrentModificationException
 			List<Nogood> tempWl = new ArrayList<Nogood>(wl.get(recentlyAssigned));
 
 			for (Nogood nogood : tempWl) {
 				Tuple<Literal, Literal> watchedLiterals = wn.get(nogood);
-				Literal watchedLiteral = watchedLiterals.getValue1() == recentlyAssigned ? watchedLiterals.getValue2()
+				Literal watchedLiteral = recentlyAssigned.equals(watchedLiterals.getValue1()) ? watchedLiterals.getValue2()
 						: watchedLiterals.getValue1();
 
 				if (nogood.isFalsifiedBy(extended)) {
 					// Nogood already falsified
-					return extended;
+					continue;
 				}
 
 				for (Nogood n : instance) {
@@ -65,7 +64,7 @@ public class UnitPropagation implements Propagation {
 						return extended;
 					}
 				}
-
+				
 				Literal unassignedLiteral = nogood.getFirstUnassignedLiteral(assignment, watchedLiteral);
 				if (unassignedLiteral != null) {
 					// modify watchlists

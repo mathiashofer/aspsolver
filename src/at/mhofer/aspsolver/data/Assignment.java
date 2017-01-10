@@ -34,15 +34,6 @@ public class Assignment implements Iterable<Literal>{
 	public boolean contains(Literal l) {
 		return assignedLiterals.contains(l);
 	}
-
-	public boolean containsAll(Collection<Literal> ls) {
-		for (Literal l : ls) {
-			if (!assignedAtoms.contains(l.getAtom())) {
-				return false;
-			}
-		}
-		return true;
-	}
 	
 	/**
 	 * 

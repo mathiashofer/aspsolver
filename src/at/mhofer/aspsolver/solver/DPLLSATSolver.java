@@ -34,7 +34,7 @@ public class DPLLSATSolver implements SATSolver {
 		Propagation propagation = propagationFactory.create(instance);
 		HashMap<Literal, Nogood> implicants = new HashMap<Literal, Nogood>();
 		HashMap<Literal, Integer> decisionLevels = new HashMap<Literal, Integer>();
-		return solve(instance, initialAssignment, null, 0, propagation, decisionLevels, implicants);
+		return solve(instance, new Assignment(initialAssignment), null, 0, propagation, decisionLevels, implicants);
 	}
 
 	@Override
@@ -47,7 +47,12 @@ public class DPLLSATSolver implements SATSolver {
 		Assignment result = null;
 		while ((result = solve(modifiedInstance, new Assignment(initialAssignment), null, 0, propagation, decisionLevels, implicants)) != null) {
 			// modify instance such that we get a new answer set if there is one
-			List<Literal> literals = new ArrayList<Literal>(result.getAssignedLiterals());
+			List<Literal> literals = new ArrayList<Literal>();
+			for (Literal l : result) {
+				if (l.getAtom().getId() > 0) {
+					literals.add(l);
+				}
+			}
 			Nogood nogood = new Nogood(literals, false);
 			modifiedInstance.add(nogood);
 
@@ -62,10 +67,7 @@ public class DPLLSATSolver implements SATSolver {
 
 	private Assignment solve(List<Nogood> instance, Assignment initialAssignment, Literal recentlyAssigned,
 			int currentDL, Propagation propagation, HashMap<Literal, Integer> decisionLevels, HashMap< Literal, Nogood> implicants) {
-		Assignment assignment = initialAssignment;
-		if (!assignment.isComplete(atoms)) {
-			assignment = propagation.propagate(instance, initialAssignment, recentlyAssigned, decisionLevels, implicants);
-		}
+		Assignment assignment = propagation.propagate(instance, initialAssignment, recentlyAssigned, decisionLevels, implicants);
 
 		for (Nogood n : instance) {
 			if (n.isSatisfiedBy(assignment) && currentDL == 0) {
@@ -80,7 +82,8 @@ public class DPLLSATSolver implements SATSolver {
 				}
 				k -= 1;
 
-				for (Literal l : assignment) {
+				List<Literal> copy = new ArrayList<Literal>(assignment.getAssignedLiterals());
+				for (Literal l : copy) {
 					Integer dl = decisionLevels.get(l);
 					if (dl > k && l.isPositive()) {
 						assignment.unassign(l);

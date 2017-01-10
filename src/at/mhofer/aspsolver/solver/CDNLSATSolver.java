@@ -49,10 +49,19 @@ public class CDNLSATSolver implements SATSolver {
 		HashMap<Literal, Nogood> implicants = new HashMap<Literal, Nogood>();
 		HashMap<Literal, Integer> decisionLevels = new HashMap<Literal, Integer>();
 		Assignment result = null;
-		while ((result = solve(modifiedInstance, new Assignment(initialAssignment), null, 0, propagation, decisionLevels, implicants)) != null) {
-			List<Literal> literals = new ArrayList<Literal>(result.getAssignedLiterals());
+		List<Nogood> oldResults = new LinkedList<Nogood>();
+		while ((result = solve(modifiedInstance, new Assignment(initialAssignment), null, 0, propagation,
+				decisionLevels, implicants)) != null) {		
+			List<Literal> literals = new ArrayList<Literal>();
+			for (Literal l : result) {
+				if (l.getAtom().getId() > 0) {
+					literals.add(l);
+				}
+			}			
 			Nogood nogood = new Nogood(literals, false);
-			modifiedInstance.add(nogood);
+			oldResults.add(nogood);
+			modifiedInstance = new LinkedList<Nogood>(instance);
+			modifiedInstance.addAll(oldResults);
 
 			implicants = new HashMap<Literal, Nogood>();
 			decisionLevels = new HashMap<Literal, Integer>();
@@ -64,30 +73,33 @@ public class CDNLSATSolver implements SATSolver {
 	}
 
 	private Assignment solve(List<Nogood> instance, Assignment initialAssignment, Literal recentlyAssigned,
-			int currentDL, Propagation propagation, HashMap<Literal, Integer> decisionLevels, HashMap<Literal, Nogood> implicants) {
-		Assignment assignment = initialAssignment;
-		if (!assignment.isComplete(atoms)) {
-			assignment = propagation.propagate(instance, initialAssignment, recentlyAssigned, decisionLevels, implicants);
-		}
+			int currentDL, Propagation propagation, HashMap<Literal, Integer> decisionLevels,
+			HashMap<Literal, Nogood> implicants) {
+		Assignment assignment = propagation.propagate(instance, initialAssignment, recentlyAssigned, decisionLevels,
+				implicants);
+
 		for (Nogood n : instance) {
 			if (n.isSatisfiedBy(assignment) && currentDL == 0) {
 				return null;
 			} else if (n.isSatisfiedBy(assignment) && currentDL > 0) {
 				// backtracking
-				Tuple<Nogood, Integer> analysisResult = conflictAnalysis.analyse(n, instance, assignment, decisionLevels, implicants);
+				Tuple<Nogood, Integer> analysisResult = conflictAnalysis.analyse(n, instance, assignment,
+						decisionLevels, implicants);
 				Nogood learnedNogood = analysisResult.getValue1();
 				int backtrackDL = analysisResult.getValue2();
 				instance.add(learnedNogood);
 				// update watchlists
 				propagation = propagationFactory.create(instance);
-				
-				for (Literal l : assignment) {
+
+				List<Literal> copy = new ArrayList<Literal>(assignment.getAssignedLiterals());
+				for (Literal l : copy) {
 					if (decisionLevels.get(l) > backtrackDL && l.isPositive()) {
 						assignment.unassign(l);
 					}
 				}
 
-				return solve(instance, assignment, recentlyAssigned, backtrackDL, propagation, decisionLevels, implicants);
+				return solve(instance, assignment, recentlyAssigned, backtrackDL, propagation, decisionLevels,
+						implicants);
 			}
 		}
 
