@@ -12,7 +12,8 @@ import at.mhofer.aspsolver.data.Program;
 import at.mhofer.aspsolver.data.Rule;
 import at.mhofer.aspsolver.data.trans.ClarksCompletionTranslation;
 import at.mhofer.aspsolver.data.trans.Translation;
-import at.mhofer.aspsolver.solver.DPLLSATSolver;
+import at.mhofer.aspsolver.solver.CDNLSATSolver;
+import at.mhofer.aspsolver.solver.FirstUIPConflictAnalysis;
 import at.mhofer.aspsolver.solver.SATSolver;
 import at.mhofer.aspsolver.solver.UnitPropagationFactory;
 
@@ -30,15 +31,16 @@ public class Main {
 
 		System.out.println(instance);
 
-		// SATSolver solver = new CDNLSATSolver(new UnitPropagationFactory(),
-		// new FirstUIPConflictAnalysis(), program.getAtoms());
+		SATSolver solver = new CDNLSATSolver(new UnitPropagationFactory(), new FirstUIPConflictAnalysis(),
+				program.getAtoms());
 
-		SATSolver solver = new DPLLSATSolver(new UnitPropagationFactory(), program.getAtoms());
+//		 SATSolver solver = new DPLLSATSolver(new UnitPropagationFactory(),
+//		 program.getAtoms());
 
 		Assignment initialAssignment = program.getInitialAssignment();
 
 		List<Assignment> result = solver.solveAll(instance, initialAssignment);
-//		 Assignment result = solver.solve(instance, initialAssignment);
+		// Assignment result = solver.solve(instance, initialAssignment);
 		System.out.println(result);
 	}
 

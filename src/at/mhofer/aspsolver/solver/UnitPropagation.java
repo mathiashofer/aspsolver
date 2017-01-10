@@ -1,6 +1,7 @@
 package at.mhofer.aspsolver.solver;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +10,6 @@ import at.mhofer.aspsolver.data.Assignment;
 import at.mhofer.aspsolver.data.Literal;
 import at.mhofer.aspsolver.data.Nogood;
 import at.mhofer.aspsolver.data.Tuple;
-import at.mhofer.aspsolver.data.TupleKeyHashMap;
 
 public class UnitPropagation implements Propagation {
 
@@ -26,8 +26,7 @@ public class UnitPropagation implements Propagation {
 
 	@Override
 	public Assignment propagate(List<Nogood> instance, Assignment assignment, Literal recentlyAssigned,
-			TupleKeyHashMap<Assignment, Literal, Integer> decisionLevels,
-			TupleKeyHashMap<Assignment, Literal, Nogood> implicants) {
+			HashMap<Literal, Integer> decisionLevels, HashMap<Literal, Nogood> implicants) {
 		List<Literal> changedLiterals = new LinkedList<Literal>();
 		changedLiterals.add(recentlyAssigned);
 		Assignment last = assignment;
@@ -44,13 +43,12 @@ public class UnitPropagation implements Propagation {
 
 	private Assignment unitPropagationStep(List<Nogood> instance, Assignment assignment,
 			Map<Nogood, Tuple<Literal, Literal>> wn, Map<Literal, List<Nogood>> wl, Literal recentlyAssigned,
-			TupleKeyHashMap<Assignment, Literal, Integer> decisionLevels,
-			TupleKeyHashMap<Assignment, Literal, Nogood> implicants) {
-		Assignment extended = new Assignment(assignment);
+			HashMap<Literal, Integer> decisionLevels, HashMap<Literal, Nogood> implicants) {
+		Assignment extended = assignment;
 		if (wl.get(recentlyAssigned) != null) {
-			//used to avoid a ConcurrentModificationException
+			// used to avoid a ConcurrentModificationException
 			List<Nogood> tempWl = new ArrayList<Nogood>(wl.get(recentlyAssigned));
-			
+
 			for (Nogood nogood : tempWl) {
 				Tuple<Literal, Literal> watchedLiterals = wn.get(nogood);
 				Literal watchedLiteral = watchedLiterals.getValue1() == recentlyAssigned ? watchedLiterals.getValue2()
@@ -77,18 +75,18 @@ public class UnitPropagation implements Propagation {
 				} else {
 					Literal negation = watchedLiteral.negation();
 					extended.assign(negation);
-					implicants.put(extended, negation, nogood);
+					implicants.put(negation, nogood);
 					// calculate max decision level
 					int maxDL = 0;
 					for (Literal l : nogood) {
 						if (!l.equals(watchedLiteral)) {
-							Integer dl = decisionLevels.get(extended, l);
+							Integer dl = decisionLevels.get(l);
 							if (dl != null && dl > maxDL) {
 								maxDL = dl;
 							}
 						}
 					}
-					decisionLevels.put(extended, negation, maxDL);
+					decisionLevels.put(negation, maxDL);
 				}
 			}
 		}

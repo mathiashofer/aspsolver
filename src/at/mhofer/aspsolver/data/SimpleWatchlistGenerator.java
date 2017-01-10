@@ -15,7 +15,7 @@ public class SimpleWatchlistGenerator implements WatchlistGenerator{
 		for (Nogood nogood : instance) {
 			List<Literal> literals = nogood.getLiterals();
 			Literal l1 = literals.get(0);
-			Literal l2 = literals.get(1);
+			Literal l2 = literals.size() > 1 ? literals.get(1) : null;
 			nogoodWatchlist.put(nogood, new Tuple<Literal, Literal>(l1, l2));
 
 			List<Nogood> n1 = literalWatchlist.getOrDefault(l1, new LinkedList<Nogood>());

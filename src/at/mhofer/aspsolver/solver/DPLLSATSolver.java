@@ -1,7 +1,6 @@
 package at.mhofer.aspsolver.solver;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,7 +10,6 @@ import at.mhofer.aspsolver.data.Assignment;
 import at.mhofer.aspsolver.data.Atom;
 import at.mhofer.aspsolver.data.Literal;
 import at.mhofer.aspsolver.data.Nogood;
-import at.mhofer.aspsolver.data.TupleKeyHashMap;
 
 public class DPLLSATSolver implements SATSolver {
 
@@ -34,8 +32,8 @@ public class DPLLSATSolver implements SATSolver {
 	@Override
 	public Assignment solve(List<Nogood> instance, Assignment initialAssignment) {
 		Propagation propagation = propagationFactory.create(instance);
-		TupleKeyHashMap<Assignment, Literal, Nogood> implicants = new TupleKeyHashMap<Assignment, Literal, Nogood>();
-		TupleKeyHashMap<Assignment, Literal, Integer> decisionLevels = new TupleKeyHashMap<Assignment, Literal, Integer>();
+		HashMap<Literal, Nogood> implicants = new HashMap<Literal, Nogood>();
+		HashMap<Literal, Integer> decisionLevels = new HashMap<Literal, Integer>();
 		return solve(instance, initialAssignment, null, 0, propagation, decisionLevels, implicants);
 	}
 
@@ -44,17 +42,17 @@ public class DPLLSATSolver implements SATSolver {
 		List<Assignment> results = new LinkedList<Assignment>();
 		List<Nogood> modifiedInstance = new LinkedList<Nogood>(instance);
 		Propagation propagation = propagationFactory.create(modifiedInstance);
-		TupleKeyHashMap<Assignment, Literal, Nogood> implicants = new TupleKeyHashMap<Assignment, Literal, Nogood>();
-		TupleKeyHashMap<Assignment, Literal, Integer> decisionLevels = new TupleKeyHashMap<Assignment, Literal, Integer>();
+		HashMap<Literal, Nogood> implicants = new HashMap<Literal, Nogood>();
+		HashMap<Literal, Integer> decisionLevels = new HashMap<Literal, Integer>();
 		Assignment result = null;
-		while ((result = solve(modifiedInstance, initialAssignment, null, 0, propagation, decisionLevels, implicants)) != null) {
+		while ((result = solve(modifiedInstance, new Assignment(initialAssignment), null, 0, propagation, decisionLevels, implicants)) != null) {
 			// modify instance such that we get a new answer set if there is one
 			List<Literal> literals = new ArrayList<Literal>(result.getAssignedLiterals());
 			Nogood nogood = new Nogood(literals, false);
 			modifiedInstance.add(nogood);
 
-			implicants = new TupleKeyHashMap<Assignment, Literal, Nogood>();
-			decisionLevels = new TupleKeyHashMap<Assignment, Literal, Integer>();
+			implicants = new HashMap<Literal, Nogood>();
+			decisionLevels = new HashMap<Literal, Integer>();
 			propagation = propagationFactory.create(modifiedInstance);
 			results.add(result);
 		}
@@ -63,26 +61,36 @@ public class DPLLSATSolver implements SATSolver {
 	}
 
 	private Assignment solve(List<Nogood> instance, Assignment initialAssignment, Literal recentlyAssigned,
-			int currentDL, Propagation propagation, TupleKeyHashMap<Assignment, Literal, Integer> decisionLevels, TupleKeyHashMap<Assignment, Literal, Nogood> implicants) {
-		Assignment assignment = propagation.propagate(instance, initialAssignment, recentlyAssigned, decisionLevels, implicants);
+			int currentDL, Propagation propagation, HashMap<Literal, Integer> decisionLevels, HashMap< Literal, Nogood> implicants) {
+		Assignment assignment = initialAssignment;
+		if (!assignment.isComplete(atoms)) {
+			assignment = propagation.propagate(instance, initialAssignment, recentlyAssigned, decisionLevels, implicants);
+		}
 
 		for (Nogood n : instance) {
 			if (n.isSatisfiedBy(assignment) && currentDL == 0) {
 				return null;
 			} else if (n.isSatisfiedBy(assignment) && currentDL > 0) {
 				// backtracking
-				int k = Collections.max(guesses.keySet());
+				int k = 1;
+				for (Integer i : guesses.keySet()) {
+					if (1 <= i && i <= currentDL && i > k) {
+						k = i;
+					}
+				}
+				k -= 1;
 
 				for (Literal l : assignment) {
-					if (decisionLevels.get(assignment, l) > k && l.isPositive()) {
+					Integer dl = decisionLevels.get(l);
+					if (dl > k && l.isPositive()) {
 						assignment.unassign(l);
 					}
 				}
 				Literal l = guesses.get(k + 1);
 				Literal alternativeGuess = l.negation();
 				assignment.assign(alternativeGuess);
-				decisionLevels.put(assignment, alternativeGuess, k);
-				implicants.put(assignment, alternativeGuess, null);
+				decisionLevels.put(alternativeGuess, k);
+				implicants.put(alternativeGuess, null);
 				return solve(instance, assignment, recentlyAssigned, currentDL - 1, propagation, decisionLevels, implicants);
 			}
 		}
@@ -94,8 +102,8 @@ public class DPLLSATSolver implements SATSolver {
 			Literal guessed = select(assignment);
 			currentDL++;
 			guesses.put(currentDL, guessed);
-			decisionLevels.put(assignment, guessed, currentDL);
-			implicants.put(assignment, guessed, null);
+			decisionLevels.put(guessed, currentDL);
+			implicants.put(guessed, null);
 			assignment.assign(guessed);
 			return solve(instance, assignment, guessed, currentDL, propagation, decisionLevels, implicants);
 		}

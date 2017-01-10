@@ -1,11 +1,11 @@
 package at.mhofer.aspsolver.solver;
 
+import java.util.HashMap;
 import java.util.List;
 
 import at.mhofer.aspsolver.data.Assignment;
 import at.mhofer.aspsolver.data.Literal;
 import at.mhofer.aspsolver.data.Nogood;
-import at.mhofer.aspsolver.data.TupleKeyHashMap;
 
 /**
  * A deterministic propagation algorithm.
@@ -23,6 +23,6 @@ public interface Propagation {
 	 * @param recentlyAssigned
 	 * @return extended assignment
 	 */
-	public Assignment propagate(List<Nogood> instance, Assignment assignment, Literal recentlyAssigned, TupleKeyHashMap<Assignment, Literal, Integer> decisionLevels, TupleKeyHashMap<Assignment, Literal, Nogood> implicants);
+	public Assignment propagate(List<Nogood> instance, Assignment assignment, Literal recentlyAssigned, HashMap<Literal, Integer> decisionLevels, HashMap<Literal, Nogood> implicants);
 
 }

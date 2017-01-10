@@ -39,7 +39,12 @@ public class Nogood implements Iterable<Literal> {
 	}
 
 	public boolean isSatisfiedBy(Assignment assignment) {
-		return assignment.containsAll(literals);
+		for (Literal l : literals) {
+			if (!assignment.contains(l)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public boolean isFalsifiedBy(Assignment assignment) {

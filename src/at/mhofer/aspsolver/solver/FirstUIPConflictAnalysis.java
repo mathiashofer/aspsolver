@@ -1,23 +1,24 @@
 package at.mhofer.aspsolver.solver;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import at.mhofer.aspsolver.data.Assignment;
 import at.mhofer.aspsolver.data.Literal;
 import at.mhofer.aspsolver.data.Nogood;
 import at.mhofer.aspsolver.data.Tuple;
-import at.mhofer.aspsolver.data.TupleKeyHashMap;
 
 public class FirstUIPConflictAnalysis implements ConflictAnalysis {
 
 	@Override
-	public Tuple<Nogood, Integer> analyse(Nogood conflictingNogood, List<Nogood> instance, Assignment assignment, TupleKeyHashMap<Assignment, Literal, Integer> decisionLevels,
-			TupleKeyHashMap<Assignment, Literal, Nogood> implicants) {
-		int newDL = -1;
+	public Tuple<Nogood, Integer> analyse(Nogood conflictingNogood, List<Nogood> instance, Assignment assignment,
+			HashMap<Literal, Integer> decisionLevels, HashMap<Literal, Nogood> implicants) {
+		int newDL = 0;
 
 		int maxDL = 0;
 		for (Literal l : assignment.getAssignedLiterals()) {
-			int dl = decisionLevels.get(assignment, l);
+			int dl = decisionLevels.get(l);
 			if (dl > maxDL) {
 				maxDL = dl;
 			}
@@ -30,11 +31,11 @@ public class FirstUIPConflictAnalysis implements ConflictAnalysis {
 		while (!literals.isEmpty() && literals.size() >= 2) {
 			Literal l1 = literals.get(0);
 			Literal l2 = literals.get(1);
-			if (decisionLevels.get(assignment, l1) != maxDL) {
+			if (decisionLevels.get(l1) != maxDL) {
 				literals.remove(0);
 				l1 = null;
 			}
-			if (decisionLevels.get(assignment, l2) != maxDL) {
+			if (decisionLevels.get(l2) != maxDL) {
 				literals.remove(1);
 				l2 = null;
 			}
@@ -43,8 +44,8 @@ public class FirstUIPConflictAnalysis implements ConflictAnalysis {
 				// here holds dl(A,l1) == dl(A,l2) == maxDL
 
 				for (Literal l : literals) {
-					Nogood implicant = implicants.get(assignment, l);
-					if (decisionLevels.get(assignment, l) == maxDL && implicant != null) {
+					Nogood implicant = implicants.get(l);
+					if (decisionLevels.get(l) == maxDL && implicant != null) {
 						learned.remove(l);
 						learned.addAll(implicant.getLiterals());
 						learned.remove(l.negation());
@@ -60,11 +61,15 @@ public class FirstUIPConflictAnalysis implements ConflictAnalysis {
 		}
 
 		int learnedMaxDL = 0;
-		for (Literal l : learned) {
-			int dl = decisionLevels.get(assignment, l);
+		for (Literal l : assignment.getAssignedLiterals()) {
+			int dl = decisionLevels.get(l);
 			if (dl > learnedMaxDL) {
 				learnedMaxDL = dl;
 			}
+		}
+
+		for (Literal l : assignment.getAssignedLiterals()) {
+			int dl = decisionLevels.get(l);
 			if (dl > newDL && dl < learnedMaxDL) {
 				// find the second highest dl
 				newDL = dl;
