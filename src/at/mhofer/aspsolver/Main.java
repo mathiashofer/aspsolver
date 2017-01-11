@@ -2,10 +2,8 @@ package at.mhofer.aspsolver;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import at.mhofer.aspsolver.data.Assignment;
 import at.mhofer.aspsolver.data.Atom;
@@ -33,17 +31,9 @@ public class Main {
 
 		System.out.println(instance);
 
-//		SATSolver solver = new CDNLSATSolver(new UnitPropagationFactory(), new FirstUIPConflictAnalysis(),
-//				program.getAtoms());
+//		SATSolver solver = new CDNLSATSolver(new UnitPropagationFactory(), new FirstUIPConflictAnalysis());
 
-		// update atoms
-		Set<Atom> atoms = new HashSet<Atom>();
-		for (Nogood n : instance) {
-			for (Literal l : n) {
-				atoms.add(l.getAtom());
-			}
-		}
-		SATSolver solver = new DPLLSATSolver(new UnitPropagationFactory(), new ArrayList<Atom>(atoms));
+		SATSolver solver = new DPLLSATSolver(new UnitPropagationFactory());
 
 		Assignment initialAssignment = program.getInitialAssignment();
 

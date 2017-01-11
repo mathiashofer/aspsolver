@@ -2,9 +2,11 @@ package at.mhofer.aspsolver.solver;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import at.mhofer.aspsolver.data.Assignment;
 import at.mhofer.aspsolver.data.Atom;
@@ -15,14 +17,11 @@ public class DPLLSATSolver implements SATSolver {
 
 	private PropagationFactory propagationFactory;
 
-	private List<Atom> atoms;
-
 	// TODO change datastructure
 	private Map<Integer, Literal> guesses = new HashMap<Integer, Literal>();
 
-	public DPLLSATSolver(PropagationFactory propagationFactory, List<Atom> atoms) {
+	public DPLLSATSolver(PropagationFactory propagationFactory) {
 		this.propagationFactory = propagationFactory;
-		this.atoms = atoms;
 	}
 
 	/**
@@ -34,7 +33,13 @@ public class DPLLSATSolver implements SATSolver {
 		Propagation propagation = propagationFactory.create(instance);
 		HashMap<Literal, Nogood> implicants = new HashMap<Literal, Nogood>();
 		HashMap<Literal, Integer> decisionLevels = new HashMap<Literal, Integer>();
-		return solve(instance, new Assignment(initialAssignment), null, 0, propagation, decisionLevels, implicants);
+		Set<Atom> atoms = new HashSet<Atom>();
+		for (Nogood n : instance) {
+			for (Literal l : n) {
+				atoms.add(l.getAtom());
+			}
+		}
+		return solve(instance, new Assignment(initialAssignment), null, 0, propagation, decisionLevels, implicants, atoms);
 	}
 
 	@Override
@@ -45,7 +50,13 @@ public class DPLLSATSolver implements SATSolver {
 		HashMap<Literal, Nogood> implicants = new HashMap<Literal, Nogood>();
 		HashMap<Literal, Integer> decisionLevels = new HashMap<Literal, Integer>();
 		Assignment result = null;
-		while ((result = solve(modifiedInstance, new Assignment(initialAssignment), null, 0, propagation, decisionLevels, implicants)) != null) {
+		Set<Atom> atoms = new HashSet<Atom>();
+		for (Nogood n : instance) {
+			for (Literal l : n) {
+				atoms.add(l.getAtom());
+			}
+		}
+		while ((result = solve(modifiedInstance, new Assignment(initialAssignment), null, 0, propagation, decisionLevels, implicants, atoms)) != null) {
 			// modify instance such that we get a new answer set if there is one
 			List<Literal> literals = new ArrayList<Literal>();
 			for (Literal l : result) {
@@ -66,7 +77,7 @@ public class DPLLSATSolver implements SATSolver {
 	}
 
 	private Assignment solve(List<Nogood> instance, Assignment initialAssignment, Literal recentlyAssigned,
-			int currentDL, Propagation propagation, HashMap<Literal, Integer> decisionLevels, HashMap< Literal, Nogood> implicants) {
+			int currentDL, Propagation propagation, HashMap<Literal, Integer> decisionLevels, HashMap< Literal, Nogood> implicants, Set<Atom> atoms) {
 		Assignment assignment = propagation.propagate(instance, initialAssignment, recentlyAssigned, decisionLevels, implicants);
 
 		for (Nogood n : instance) {
@@ -94,7 +105,7 @@ public class DPLLSATSolver implements SATSolver {
 				assignment.assign(alternativeGuess);
 				decisionLevels.put(alternativeGuess, k);
 				implicants.put(alternativeGuess, null);
-				return solve(instance, assignment, recentlyAssigned, currentDL - 1, propagation, decisionLevels, implicants);
+				return solve(instance, assignment, recentlyAssigned, currentDL - 1, propagation, decisionLevels, implicants, atoms);
 			}
 		}
 
@@ -102,13 +113,13 @@ public class DPLLSATSolver implements SATSolver {
 			return assignment;
 		} else {
 			// guess
-			Literal guessed = select(assignment);
+			Literal guessed = select(assignment, atoms);
 			currentDL++;
 			guesses.put(currentDL, guessed);
 			decisionLevels.put(guessed, currentDL);
 			implicants.put(guessed, null);
 			assignment.assign(guessed);
-			return solve(instance, assignment, guessed, currentDL, propagation, decisionLevels, implicants);
+			return solve(instance, assignment, guessed, currentDL, propagation, decisionLevels, implicants, atoms);
 		}
 	}
 
@@ -117,7 +128,7 @@ public class DPLLSATSolver implements SATSolver {
 	 * @param assignment
 	 * @return
 	 */
-	private Literal select(Assignment assignment) {
+	private Literal select(Assignment assignment, Set<Atom> atoms) {
 		for (Atom a : atoms) {
 			if (!assignment.isAssigned(a)) {
 				return new Literal(a, true);
